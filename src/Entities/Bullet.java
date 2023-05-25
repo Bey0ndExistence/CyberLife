@@ -5,6 +5,10 @@ import java.awt.image.BufferedImage;
 
 import static Utils.Constants.PlayerConstants.getSpriteAmountTiles;
 
+/**
+ * The Bullet class represents a bullet object in a game, with properties such as direction, speed,
+ * animation, and collision detection.
+ */
 public class Bullet extends TilesHitBox{
 
     private boolean isPlayerBullet;
@@ -14,6 +18,11 @@ public class Bullet extends TilesHitBox{
     private boolean active = false;
     private int aniTick,aniSpeed=35,aniIndex, bullet_type;
 
+   // This is the constructor for the Bullet class. It takes in several parameters including the x and
+   // y position, width and height of the bullet, an array of BufferedImages for the animation frames,
+   // the direction of the bullet, the type of bullet, and a boolean indicating whether the bullet
+   // belongs to the player or not. It sets the direction, animation frames, bullet type, and speed of
+   // the bullet, and initializes the active state of the bullet to false.
     public Bullet(float x, float y, int width, int height, BufferedImage[] image,int dir,int bullet_type,boolean isPlayerBullet  ) {
         super(x, y, width, height, null);
         this.dir =dir;
@@ -39,6 +48,14 @@ public class Bullet extends TilesHitBox{
     public boolean isActive(){
         return active;
     }
+    /**
+     * The function checks for collision between an enemy's bullet and the player, and if there is a
+     * collision, it deactivates the hitbox, damages the player, and sets the player as not alive.
+     * 
+     * @param player The player parameter is an instance of the Player class, which represents the
+     * player character in the game.
+     * @param damage The amount of damage that will be inflicted on the player if a collision occurs.
+     */
     public void checkPlayerCollision(Player player,int damage) {
         if (hitbox.intersects(player.getHitbox())) {
             setActive(false);

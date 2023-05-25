@@ -6,10 +6,13 @@ import gamestates.Gamestate;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.Scanner;
 
 import static Utils.Constants.PlayerConstants.*;
 
@@ -56,7 +59,10 @@ public class Player extends Entity{
     private int pressed=0,hold=0;
     private boolean okShoot= false;
 
-    Bullet bullet;
+    public int deathTimer=0;
+    public int deathCooldown =100;
+
+    private int nrHeartsTook=0;
 
     private ArrayList<Bullet> bullets;
 
@@ -69,14 +75,32 @@ public class Player extends Entity{
     // resetting the player's position if they fall off the screen.
 
     public Player(float x, float y,int width, int height)  {
-        super(x, y,width,height);
-        loadAnimations();
+        super(x, y, width, height);
 
-        initHitbox(x+50 ,y+100  , width/3, 200);
-        cameraHitbox = new Rectangle(1200,200,200,200);
+        try {
 
-        loadBulletAnimation();
-        bullets = new ArrayList<Bullet>();
+            loadAnimations();
+            File map2 = new File("src/PlayerHitbox");
+            Scanner scanner = new Scanner(map2);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] values = line.split(",");
+                int x_hitbox = Integer.parseInt(values[0]);
+                int y_hitbox = Integer.parseInt(values[1]);
+                int width_hitbox = Integer.parseInt(values[2]);
+                int height_hitbox = Integer.parseInt(values[3]);
+                initHitbox(x_hitbox, y_hitbox, width_hitbox, height_hitbox);
+            }
+            cameraHitbox = new Rectangle(1200,200,200,200);
+
+            loadBulletAnimation();
+            bullets = new ArrayList<Bullet>();
+        }
+        catch (FileNotFoundException e){
+
+        }
+
+
     }
 
     public Rectangle getCameraHitbox(){
@@ -88,7 +112,7 @@ public class Player extends Entity{
     }
 
     public void update(ArrayList<TilesHitBox> wall, ArrayList<Enemy> enemies) {
-        updatePos(wall);
+        updatePos(wall,enemies);
         UpdateAnimation();
         setAnimation();
 
@@ -102,6 +126,7 @@ public class Player extends Entity{
                             if (enemies.get(j) instanceof Turret) {
                                 if (!((Turret) enemies.get(j)).enemy_got_damaged()) {
                                     enemies.remove(enemies.get(j));
+
                                 }
                             } else if (enemies.get(j) instanceof Cop) {
                                 if (!((Cop) enemies.get(j)).enemy_got_damaged())
@@ -134,10 +159,15 @@ public class Player extends Entity{
     }
 
     public void render(Graphics g){
-        g.drawImage(this.animationSheet[playerAction][this.aniIndex],(int)x-20,(int)y-50,width, height, null);
-        drawHitbox(g);
-        //g.drawRect(hitbox.x,hitbox.y,width,height);
-        drawBullets(g);
+        try {
+            g.drawImage(this.animationSheet[playerAction][this.aniIndex], (int) x - 20, (int) y - 50, width, height, null);
+           // drawHitbox(g);
+            //g.drawRect(hitbox.x,hitbox.y,width,height);
+            drawBullets(g);
+        }
+        catch (IndexOutOfBoundsException e){
+            System.out.println("ceva outofbounds");
+        }
 
     }
 
@@ -148,7 +178,7 @@ public class Player extends Entity{
             }
         }
         catch (ConcurrentModificationException e){
-            e.printStackTrace();
+            System.out.println("bullets drawn bad from player");
         }
 
     }
@@ -203,7 +233,8 @@ public class Player extends Entity{
 
     public static void damage(int damage) {
         playerLives-=damage;
-        System.out.println("You got only " + playerLives + " left");
+        if(!(playerLives<0))
+            System.out.println("You got only " + playerLives + " left");
         if (playerLives <= 0) {
             Gamestate.state = Gamestate.MENU;
             isAlive = false;
@@ -254,6 +285,9 @@ public class Player extends Entity{
         return LastCameraX;
     }
 
+    public int getNrHeartsTook(){
+        return nrHeartsTook;
+    }
     public void setDucking(){
         if (!cooldown) {
             this.duck = true;
@@ -272,7 +306,7 @@ public class Player extends Entity{
         this.shooting =false;
     }
 
-    private void updatePos(ArrayList<TilesHitBox> walls){
+    private void updatePos(ArrayList<TilesHitBox> walls, ArrayList<Enemy> enemies){
         this.moving = false;
         TilesHitBox wall= null;
 
@@ -317,9 +351,25 @@ public class Player extends Entity{
 
         boolean ok = true;
         if (xspeed > 0) { // move to the right
+            float tilesDirection = - xspeed;
             iter = walls.iterator();
             while (iter.hasNext()) {
                 wall = iter.next();
+                for (Enemy enemy : enemies) {
+                    // Check if the player's next position will collide with the enemy's hitbox
+                    if (tilesDirection + wall.getHitbox().width >= enemy.getHitbox().x  &&
+                            wall.getHitbox().y < enemy.getHitbox().y + enemy.getHitbox().height &&
+                            wall.getHitbox().y + wall.getHitbox().height > enemy.getHitbox().y) {
+
+                        // Calculate the new position for both the player and the enemy based on the direction of the tiles
+                        int newEnemyX = enemy.getHitbox().x + (int) tilesDirection;
+
+                        // Move the player and the enemy to their respective new positions
+
+                        enemy.setHitbox_X(newEnemyX);
+                    }
+                }
+
                 if (hitbox.x + hitbox.width + xspeed >= wall.getHitbox().x &&
                         hitbox.x + hitbox.width <= wall.getHitbox().x &&
                         hitbox.y < wall.getHitbox().y + wall.getHitbox().height &&
@@ -333,7 +383,7 @@ public class Player extends Entity{
                     }
                     else if(wall instanceof Heart){
                         ((Heart) wall).isVisible = false;
-                        ((Heart) wall).nrHearsTook();
+                        nrHeartsTook++;
                         playerLives++;
                         iter.remove();
                     }
@@ -347,29 +397,50 @@ public class Player extends Entity{
                 cameraHitbox.x += xspeed;
             }
         } else if (xspeed < 0) { // move to the left
+            float tilesDirection = - xspeed;
             iter= walls.iterator();
             while (iter.hasNext()) {
                 wall = iter.next();
+
+                for (Enemy enemy : enemies) {
+
+                    if (tilesDirection + wall.getHitbox().width >= enemy.getHitbox().x  &&
+                            wall.getHitbox().y < enemy.getHitbox().y + enemy.getHitbox().height &&
+                            wall.getHitbox().y + wall.getHitbox().height > enemy.getHitbox().y) {
+
+                        // Calculate the new position for both the player and the enemy based on the direction of the tiles
+                        int newEnemyX =  enemy.getHitbox().x + (int) tilesDirection;
+                        if(enemy instanceof Cop)
+                            ((Cop) enemy).setMovingRight();
+
+                        // Move the player and the enemy to their respective new positions
+
+                        enemy.setHitbox_X(newEnemyX);
+                    }
+                }
+
+
                 if (hitbox.x + xspeed <= wall.getHitbox().x + wall.getHitbox().width &&
                         hitbox.x >= wall.getHitbox().x + wall.getHitbox().width &&
                         hitbox.y < wall.getHitbox().y + wall.getHitbox().height &&
                         hitbox.y + hitbox.height > wall.getHitbox().y)  {
-                    if (wall instanceof Guns) {
-                        ((Guns) wall).isVisible = false;
-                        ((Guns) wall).nrGunsTook();
-                        secondGun = true;
-                        iter.remove(); // remove element using iterator
-                    }
-                    else if(wall instanceof Heart){
-                        ((Heart) wall).isVisible = false;
-                        ((Heart) wall).nrHearsTook();
-                        playerLives++;
-                        iter.remove();
-                    }
-                    else {
-                        ok = false;
-                        break;
-                    }
+
+                                    if (wall instanceof Guns) {
+                                        ((Guns) wall).isVisible = false;
+                                        ((Guns) wall).nrGunsTook();
+                                        secondGun = true;
+                                        iter.remove(); // remove element using iterator
+                                    }
+                                    else if(wall instanceof Heart){
+                                        ((Heart) wall).isVisible = false;
+                                        ((Heart) wall).nrHearsTook();
+                                        playerLives++;
+                                        iter.remove();
+                                    }
+                                    else {
+                                        ok = false;
+                                        break;
+                                    }
                 }
             }
             if (ok) {
@@ -491,12 +562,17 @@ public class Player extends Entity{
             else
                 this.playerAction = SHOOTcombuster;
         }
-        else if(this.isAlive== false){
+        else if(!isAlive){
+
             this.playerAction = HURT;
             y -= 2;
             hitbox.y = (int) y ;
 
-            this.isAlive= true;
+            if(deathTimer > deathCooldown){
+                this.setAlive(true);
+                deathTimer=0;
+            }
+            deathTimer++;
         }
         else {
             this.playerAction = IDLE;
@@ -511,9 +587,6 @@ public class Player extends Entity{
 
     }
 
-//    public void setSecondGun(){
-//        secondGun= true;
-//    }
 
         public int getPlayerLives(){
             return playerLives;

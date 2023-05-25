@@ -50,15 +50,7 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
     public void mouseReleased(MouseEvent e) {
         switch (Gamestate.state){
             case MENU:
-                try {
                     gamePanel.getGame().getMenu().mouseReleased(e);
-                } catch (SQLException ex) {
-                   System.out.println("exceptie baza de date");
-                } catch (IOException ex) {
-                    System.out.println("IO EXCEPTION");
-                } catch (GameException ex) {
-                    throw new RuntimeException(ex);
-                }
                 break;
             case PLAYING:
                 gamePanel.getGame().getPlaying().mouseReleased(e);

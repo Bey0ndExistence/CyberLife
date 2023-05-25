@@ -21,7 +21,7 @@ public class MenuButton {
 
     private int xOffsetCenter = B_WIDTH / 2;
     private Game game;
-    public MenuButton(int xPos, int yPos, int rowIndex, Gamestate state,Game game) throws GameException {
+    public MenuButton(int xPos, int yPos, int rowIndex, Gamestate state,Game game)  {
         this.xPos = xPos;
         this.yPos = yPos;
         this.rowIndex = rowIndex;
@@ -40,11 +40,17 @@ public class MenuButton {
         return state;
     }
 
-    private void loadImgs() throws GameException {
-        imgs = new BufferedImage[3];
-        BufferedImage temp = LoadSave.getInstance().getAtlas(LoadSave.BUTTONS);
-        for (int i = 0; i < imgs.length; i++)
-            imgs[i] = temp.getSubimage(i * B_WIDTH_DEFAULT, rowIndex * B_HEIGHT_DEFAULT, B_WIDTH_DEFAULT, B_HEIGHT_DEFAULT);
+    private void loadImgs()  {
+        try {
+            imgs = new BufferedImage[3];
+            BufferedImage temp = LoadSave.getInstance().getAtlas(LoadSave.BUTTONS);
+            for (int i = 0; i < imgs.length; i++)
+                imgs[i] = temp.getSubimage(i * B_WIDTH_DEFAULT, rowIndex * B_HEIGHT_DEFAULT, B_WIDTH_DEFAULT, B_HEIGHT_DEFAULT);
+        }
+        catch (GameException e){
+            System.out.println(e.toString());
+        }
+
     }
 
     public void draw(Graphics g,Graphics2D g2d) {
@@ -78,7 +84,7 @@ public class MenuButton {
         return bounds;
     }
 
-    public void applyGamestate() throws SQLException, IOException, GameException {
+    public void applyGamestate() {
         if(state== Gamestate.PLAYING)
             game.resetGame();
         Gamestate.state = state;

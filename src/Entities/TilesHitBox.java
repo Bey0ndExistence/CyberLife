@@ -18,6 +18,7 @@ public  class TilesHitBox extends Entity{
         this.image = image;
     }
 
+
     public float getHitbox_X() {
         return hitbox.x;
     }

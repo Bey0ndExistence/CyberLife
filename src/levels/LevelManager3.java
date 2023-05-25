@@ -152,7 +152,7 @@ public class LevelManager3 {
                 } else {
                     hitBox.draw(g);
                 }
-                hitBox.drawHitbox(g);
+             //   hitBox.drawHitbox(g);
 
             }
         }

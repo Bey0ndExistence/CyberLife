@@ -20,10 +20,13 @@ public class Turret extends Enemy{
 
     private int life;
 
-    private int shootCooldown = 270; // Cooldown in ticks (adjust as needed)
+    private int shootCooldown = 230; // Cooldown in ticks (adjust as needed)
     private int shootTimer = 0; // Timer to track cooldown
 
     private int damage;
+
+    public int deathTimer=0;
+    public int deathCooldown = 100;
 
     Player player;
     Bullet bullet;
@@ -34,8 +37,7 @@ public class Turret extends Enemy{
         loadBulletAnimation();
         this.aniSpeed = 45;
         this.detectionDistance = 700;
-        bullet = new Bullet(this.x , this.y+20,32,32, bulletSheet,-1 ,BULLET_TURRET,false);
-        bullet.initHitbox(this.x,this.y +20,32,32);
+
         bullets = new ArrayList<Bullet>();
         this.life = lives;
         this.damage = damage;
@@ -56,6 +58,8 @@ public class Turret extends Enemy{
             life-=2;
         else
             life--;
+
+
 
         System.out.println("Enemy has only " + life +"remaining");
         return (life > 0);

@@ -24,14 +24,12 @@ public class FinalBoss extends Enemy{
     BufferedImage [] bulletSheet;
 
     Bullet bullet;
-    private boolean animationFinished = false;
-    private int deathCooldown = 100; // Cooldown duration in ticks
-    private int deathCooldownTick = 0; // Current tick count
 
     private int shootCooldown = 200; // Cooldown in ticks (adjust as needed)
     private int shootTimer = 0; // Timer to track cooldown
 
     private int damage;
+
     public FinalBoss(float x, float y, int width, int height, int enemyType, BufferedImage[][] image,Player player, int lives, int damage) {
         super(x, y, width, height, enemyType);
         this.image = image;
@@ -60,6 +58,7 @@ public class FinalBoss extends Enemy{
         if(lives==0){
             alive =false;
         }
+
 
         System.out.println("Enemy has only " + lives +"remaining");
         return (lives > 0);

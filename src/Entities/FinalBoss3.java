@@ -34,13 +34,6 @@ public class FinalBoss3 extends Enemy{
     ScoreSubject subject;
     private int damage;
 
-
-    private boolean canAttack;
-    private int attackCooldown;
-    private int cooldownTimer;
-    private int attackDelay;
-    private int attackDelayTimer;
-
     private int attackDistance;
 
     private boolean secondGun=false;
@@ -56,7 +49,7 @@ public class FinalBoss3 extends Enemy{
         loadBulletAnimation();
         loadBulletAnimationSecondGun();
         this.player = player;
-        this.detectionDistance = 700;
+        this.detectionDistance = 850;
         this.lives = lives;
         bullet = new Bullet(this.x , this.y+20,145, 25, bulletSheet,-1 ,BULLET_BOSS_LVL1,false);
         bullet.initHitbox(this.x,this.y +20,145, 25);
@@ -64,12 +57,6 @@ public class FinalBoss3 extends Enemy{
         this.damage = damage;
         this.subject = subject;
 
-
-        this.attackCooldown = 150;
-        this.cooldownTimer = 0;
-        this.canAttack = true;
-        this.attackDelay = 150; // Adjust the delay value as needed
-        this.attackDelayTimer = 0;
     }
 
     @Override
@@ -136,9 +123,9 @@ public class FinalBoss3 extends Enemy{
             // Check if the player is within detection distance and if enough time has passed since the last shot
             if (playerDetected && shootTimer >= shootCooldown) {
                 if(!secondGun)
-                    shootBullet(player);
+                    shootBullet();
                 else
-                    shootBulletSecondGun(player);
+                    shootBulletSecondGun();
 
                 shootTimer = 0; // Reset the shoot timer
             }
@@ -201,7 +188,7 @@ public class FinalBoss3 extends Enemy{
         }
     }
 
-    private void shootBullet(Player player) {
+    private void shootBullet() {
 
         float xShoot = this.hitbox.x-180 ;
         float yShoot = this.hitbox.y + 113;
@@ -212,7 +199,7 @@ public class FinalBoss3 extends Enemy{
         bullets.add(newBullet);
     }
 
-    private void shootBulletSecondGun(Player player) {
+    private void shootBulletSecondGun() {
 
         float xShoot = this.hitbox.x-180 ;
         float yShoot = this.hitbox.y + 100;
@@ -220,7 +207,6 @@ public class FinalBoss3 extends Enemy{
         newBullet.initHitbox(xShoot, yShoot,64, 64);
         newBullet.setActive(true);
         newBullet.setPos(xShoot, yShoot);
-        //newBullet.setSpeed(bulletXSpeed);
 
         bullets.add(newBullet);
     }

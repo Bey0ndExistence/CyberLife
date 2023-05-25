@@ -58,6 +58,7 @@ public class LoadSave {
     public static final String CAR_TESLA= "car-tesla.png";
     public static final String PORTAL_LVL2= "purple_portal.png";
     public static final String BOSS_LVL2= "boss_lvl2_final.png";
+    public static final String BLANK= "blank.png";
 
     //LVL3
     public static final String LVL3_MAP= "lvl3map_final.png";

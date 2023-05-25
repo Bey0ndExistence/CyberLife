@@ -9,10 +9,13 @@ import levels.Database;
 import levels.LevelManager;
 
 import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Scanner;
 
 /**
  * This is a Java class that represents a game and handles the game loop, updating game objects, and
@@ -40,7 +43,7 @@ public class Game implements Runnable {
 
     EndGame endGame;
 
-    public Game() throws GameException, IOException, SQLException {
+    public Game()  {
         initClasses();
         gamePanel = new GamePanel(this);
         this.gameWindow= new GameWindow(this.gamePanel);
@@ -50,19 +53,40 @@ public class Game implements Runnable {
         startGameLoop();
     }
 
-    private void initClasses() throws IOException, GameException, SQLException {
+    private void initClasses()   {
         menu = new Menu(this);
         subject = new ScoreSubject();
-        player = new Player(1000,200,240,240);
+        spawnPlayer();
         playing = new Playing(this,player,menu,subject);
         playing2 = new Playing2(this,player,menu,subject);
         playing3 = new Playing3(this,player,menu,subject);
         endGame = new EndGame(subject);
+
     }
 
     private void startGameLoop(){
         this.gameThread= new Thread(this);
         gameThread.start();
+    }
+
+    void spawnPlayer()  {
+        try {
+            File map2 = new File("src/PlayerSpawn");
+            Scanner  scanner = new Scanner(map2);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] values = line.split(",");
+                int x = Integer.parseInt(values[0]);
+                int y = Integer.parseInt(values[1]);
+                int width = Integer.parseInt(values[2]);
+                int height = Integer.parseInt(values[3]);
+                player = new Player(x, y, width, height);
+            }
+        }
+        catch (IOException e){
+            System.out.println(e.toString());
+        }
+
     }
 
     public void update() {
@@ -87,7 +111,7 @@ public class Game implements Runnable {
                 SaveDatabase();
                 System.exit(0);
             }
-                break;
+            break;
             case QUIT:
                 System.exit(0);
                 break;
@@ -161,23 +185,38 @@ public class Game implements Runnable {
         }
     }
 
-    public void resetGame() throws SQLException, IOException, GameException {
-        player = new Player(1000,200,240,240);
-        subject.removeObserver(playing.getEnemyManager());
-        subject.removeObserver(playing2.getEnemyManager());
-        subject.removeObserver(playing3.getEnemyManager());
+    public void resetGame()  {
+        try {
+            File map2 = new File("src/PlayerSpawn");
+            Scanner  scanner = new Scanner(map2);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] values = line.split(",");
+                int x = Integer.parseInt(values[0]);
+                int y = Integer.parseInt(values[1]);
+                int width = Integer.parseInt(values[2]);
+                int height = Integer.parseInt(values[3]);
+                player = new Player(x, y, width, height);
+            }
+            subject.removeObserver(playing.getEnemyManager());
+            subject.removeObserver(playing2.getEnemyManager());
+            subject.removeObserver(playing3.getEnemyManager());
 
-        playing =  null;
-        playing2 = null;
-        playing3=  null;
+            playing =  null;
+            playing2 = null;
+            playing3=  null;
 
-        subject.setScore(0);
-        playing = new Playing(this,player,menu,subject);
-        playing2 = new Playing2(this,player,menu,subject);
-        playing3 = new Playing3(this,player,menu,subject);
+            subject.setScore(0);
+            playing = new Playing(this,player,menu,subject);
+            playing2 = new Playing2(this,player,menu,subject);
+            playing3 = new Playing3(this,player,menu,subject);
 
 
-        player.resetLives();
+            player.resetLives();
+        }
+      catch (FileNotFoundException e){
+            System.out.println("bruh");
+      }
 
 
     }
@@ -207,13 +246,13 @@ public class Game implements Runnable {
             Statement statement = connection.createStatement();
 
             // Create the table if it doesn't exist
-            String createTableSql = "CREATE TABLE IF NOT EXISTS SAVES_FROM_MENU (Score INT,  EnemiesLvl1 INT,  EnemiesLvl2 INT,  EnemiesLvl3 INT, Lives INT, XPos INT, YPos INT, GameState VARCHAR(255), HasSecondGun INTEGER)";
+            String createTableSql = "CREATE TABLE IF NOT EXISTS SAVES_FROM_MENU (Score INT,  EnemiesLvl1 INT,  EnemiesLvl2 INT,  EnemiesLvl3 INT, Lives INT, XPos INT, YPos INT, GameState VARCHAR(255), HasSecondGun INTEGER, HeartsTook INTEGER)";
 
             statement.execute(createTableSql);
 
             // Insert the score, lives, player position, and gun type values into the table
             int hasSecondGun = player.isSecondGun() ? 1 : 0; // Convert boolean to 0 or 1
-            String insertDataSql = "INSERT INTO SAVES_FROM_MENU (Score, EnemiesLvl1, EnemiesLvl2, EnemiesLvl3, Lives, XPos, YPos, GameState, HasSecondGun) VALUES (" +
+            String insertDataSql = "INSERT INTO SAVES_FROM_MENU (Score, EnemiesLvl1, EnemiesLvl2, EnemiesLvl3, Lives, XPos, YPos, GameState, HasSecondGun, HeartsTook) VALUES (" +
                     subject.getScore() + ", " +
                     playing.getEnemyManager().getEnemiesLeft() + ", " +
                     playing2.getEnemyManager().getEnemiesLeft() + ", " +
@@ -222,7 +261,8 @@ public class Game implements Runnable {
                     player.getCameraHitbox().x + ", " +
                     player.getHitbox().y + ", '" +
                     menu.getGamestate().name() + "', " +
-                    hasSecondGun + ")";
+                    hasSecondGun + "," +
+                    player.getNrHeartsTook() + " )";
             try {
                 statement.execute(insertDataSql);
             } catch (SQLException e) {

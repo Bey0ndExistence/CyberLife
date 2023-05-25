@@ -13,9 +13,9 @@ public class EndGame {
     ScoreSubject subject;
 
     BufferedImage[] backgroundImg;
-    public EndGame(ScoreSubject subject) throws GameException {
-            this.subject = subject;
-            loadMenuBg();
+    public EndGame(ScoreSubject subject)  {
+        this.subject = subject;
+        loadMenuBg();
     }
 
     public void update() {
@@ -37,11 +37,15 @@ public class EndGame {
 
     }
 
-    private void loadMenuBg() throws GameException {
-        backgroundImg = new BufferedImage[2];
-        BufferedImage temp = LoadSave.getInstance().getAtlas(LoadSave.MENU_BACKGROUNDS);
-        for (int i = 0; i < backgroundImg.length; i++)
-            backgroundImg[i] = temp.getSubimage(i * 1920, 0, 1920,1120);
+    private void loadMenuBg() {
+        try {
+            backgroundImg = new BufferedImage[2];
+            BufferedImage temp = LoadSave.getInstance().getAtlas(LoadSave.MENU_BACKGROUNDS);
+            for (int i = 0; i < backgroundImg.length; i++)
+                backgroundImg[i] = temp.getSubimage(i * 1920, 0, 1920, 1120);
 
+        } catch (GameException e) {
+            System.out.println(e.toString());
+        }
     }
 }

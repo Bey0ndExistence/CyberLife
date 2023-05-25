@@ -22,7 +22,7 @@ public class GamePanel extends JPanel {
     private BufferedImage img;
 
     private Game game;
-    public GamePanel(Game game) throws IOException {
+    public GamePanel(Game game)  {
         mouseInputs = new MouseInputs(this);
         this.game=game;
         addKeyListener(new KeyboardInputs(this));

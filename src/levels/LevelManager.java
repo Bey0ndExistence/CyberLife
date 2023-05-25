@@ -219,7 +219,7 @@ public class LevelManager {
                 // hitBox.drawHitbox(g);
             }
         } catch (ConcurrentModificationException e) {
-            e.printStackTrace();
+            System.out.println("Nu-i okei la desenat in primul nivel");
         }
     }
     public void drawBG(Graphics2D g2d) {

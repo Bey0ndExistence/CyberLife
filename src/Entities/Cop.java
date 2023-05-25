@@ -13,7 +13,7 @@ public class Cop extends  Enemy{
     Player player;
     private int lives = 2;
 
-    Camera camera;
+
 
     public Cop(float x, float y, int width, int height,  int enemyType,BufferedImage[][] image,Player player, int lives,Camera camera) {
         super(x, y, width, height, enemyType);
@@ -21,10 +21,18 @@ public class Cop extends  Enemy{
         this.player = player;
         this.lives = lives;
         this.detectionDistance = 400;
-        this.camera = camera;
-        camera.setEnemy(this);
+
+
     }
 
+   /**
+    * This function reduces the lives of an enemy in a game and returns a boolean indicating if the
+    * enemy is still alive.
+    * 
+    * @return The method is returning a boolean value that indicates whether the enemy still has lives
+    * remaining or not. If the enemy has lives remaining, the method returns true, otherwise it returns
+    * false.
+    */
     public boolean enemy_got_damaged(){
         if(player.isSecondGun())
             lives-=2;
@@ -42,6 +50,15 @@ public class Cop extends  Enemy{
     }
 
 
+   /**
+    * This function updates the position and state of an enemy character in a game based on the
+    * player's position and other game elements.
+    * 
+    * @param player The player object that the enemy is trying to detect and chase.
+    * @param walls An ArrayList of TilesHitBox objects representing the walls in the game level.
+    * @param camera The camera object used to display the game world. It is likely used to determine
+    * the position of the enemy on the screen.
+    */
     @Override
     public void updateEnemyPos(Player player, ArrayList<TilesHitBox> walls, Camera camera) {
         previouAction = this.enemyState;
@@ -60,12 +77,12 @@ public class Cop extends  Enemy{
         if (playerDetected) {
             float distanceToPlayer = player.getX() - getHitbox_X();
             enemyState = RUNNING;
-            if (distanceToPlayer < -350) {
+            if (distanceToPlayer < -300) {
                 // Player is to the left of the enemy by more than 200 pixels
                 movingLeft = true;
                 movingRight = false;
 
-            } else if (distanceToPlayer > 350) {
+            } else if (distanceToPlayer > 300) {
                 // Player is to the right of the enemy by more than 200 pixels
                 movingLeft = false;
                 movingRight = true;
@@ -78,7 +95,8 @@ public class Cop extends  Enemy{
            update(camera);
        }
 
-       else if(movingRight){
+       if(movingRight){
+
            if(player.getCameraHitbox().x - player.getLastCameraX() > 0) // playerul se misca la dreapta
                 xspeed = 1;
            if(player.getCameraHitbox().x - player.getLastCameraX() < 0) // playerul se misca la stanga
@@ -93,8 +111,17 @@ public class Cop extends  Enemy{
             this.aniIndex = 0;
             this.aniTick = 0;
         }
+
+
+        //System.out.println(player.getCameraHitbox().x - getHitbox_X());
     }
 
+    public void setMovingLeft(){
+        movingLeft = true;
+    }
+    public void setMovingRight(){
+        movingRight = true;
+    }
 
 
 

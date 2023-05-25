@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Scanner;
 
 public class Lvl2Overlay {
@@ -21,11 +22,19 @@ public class Lvl2Overlay {
             palmTrees = new ArrayList<>();
             // Add palm trees to the list
             palmTreeImage = LoadSave.getInstance().getAtlas(LoadSave.PALMIER);
-            palmTrees.add(new TilesHitBox(600,250,399,624,palmTreeImage));
-            //palmTrees.add(new TilesHitBox(750,150,399,624, palmTreeImage));
-            palmTrees.add(new TilesHitBox(1800,220,399,624, palmTreeImage));
-            palmTrees.add(new TilesHitBox(3500,145,399,624, palmTreeImage));
-            // Add more palm trees as needed
+
+            File Map = new File("src/Lvl2OverlayMap");
+            Scanner scanner = new Scanner(Map);
+
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] values = line.split(",");
+                int x = Integer.parseInt(values[0]);
+                int y = Integer.parseInt(values[1]);
+                int width = Integer.parseInt(values[2]);
+                int height = Integer.parseInt(values[3]);
+                palmTrees.add(new TilesHitBox(x, y, width, height, palmTreeImage));
+            }
 
             File mapHitbox = new File("src/Lvl2OverlayHitboxes");
             Scanner scannerHitbox = new Scanner(mapHitbox);
@@ -57,8 +66,13 @@ public class Lvl2Overlay {
     }
 
     public void draw(Graphics g) {
-        for (TilesHitBox palmTree : palmTrees) {
-            palmTree.draw(g);
+        try {
+            for (TilesHitBox palmTree : palmTrees) {
+                palmTree.draw(g);
+            }
+        }
+        catch (ConcurrentModificationException e){
+            System.out.println("ceva e not okei la Lvl2Overlay draw");
         }
     }
 }

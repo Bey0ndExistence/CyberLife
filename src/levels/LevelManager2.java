@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Scanner;
 
 import static Utils.Constants.PlayerConstants.*;
@@ -24,7 +25,7 @@ public class LevelManager2 {
 
     private Game game;
     Playing2 playing2;
-    private BufferedImage miami_car,miami_highway, palm_tree, car_bmw,car_tesla, BG_FAR, BG_MIDDLE, BG_CLOSE;
+    private BufferedImage blank,miami_car,miami_highway, palm_tree, car_bmw,car_tesla, BG_FAR, BG_MIDDLE, BG_CLOSE;
     private Camera camera;
 
 
@@ -52,6 +53,7 @@ public class LevelManager2 {
             miami_car = LoadSave.getInstance().getAtlas(LoadSave.MASINA);
             palm_tree = LoadSave.getInstance().getAtlas(LoadSave.PALMIER);
             car_bmw = LoadSave.getInstance().getAtlas(LoadSave.CAR_BMW);
+            blank = LoadSave.getInstance().getAtlas(LoadSave.BLANK);
 
             //Background layers
             BG_FAR = LoadSave.getInstance().getAtlas(LoadSave.BG_FAR_LVL2);
@@ -116,6 +118,9 @@ public class LevelManager2 {
                 } else if (type == 3) {
                     hitBoxes.add(new Heart(x, y, width, height, heart));
                 }
+                else if(type==4){
+                    hitBoxes.add(new TilesHitBox(x,y,width,height,blank));
+                }
 
             }
 
@@ -141,21 +146,28 @@ public class LevelManager2 {
 
 
     public  void drawTiles(Graphics g){
-        for( TilesHitBox hitBox : hitBoxes){
+        try {
+            for( TilesHitBox hitBox : hitBoxes){
 
-            if (hitBox instanceof TilesHitBoxAnimated) {
-                ((TilesHitBoxAnimated) hitBox).drawAnimated(g);
+                if (hitBox instanceof TilesHitBoxAnimated) {
+                    ((TilesHitBoxAnimated) hitBox).drawAnimated(g);
+
+                }
+                else if(hitBox instanceof Guns) {
+                    ((Guns) hitBox).drawGun(g);
+                }
+                else {
+
+                    hitBox.draw(g);
+                }
+             //   hitBox.drawHitbox(g);
 
             }
-            else if(hitBox instanceof Guns) {
-                ((Guns) hitBox).drawGun(g);
-            }
-            else {
-                hitBox.draw(g);
-            }
-            hitBox.drawHitbox(g);
-
         }
+        catch (ConcurrentModificationException e){
+            System.out.println("ceva nu e okei in drawTiles din LvlMan2");
+        }
+
     }
     public void drawBG(Graphics2D g2d) {
 
@@ -177,4 +189,5 @@ public class LevelManager2 {
             }
         }
     }
+
 }

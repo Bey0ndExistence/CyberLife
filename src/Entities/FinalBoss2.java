@@ -117,7 +117,7 @@ public class FinalBoss2 extends Enemy{
                     attackingHitbox.setLocation((int) getHitbox().x - 100, (int) getHitbox().y + 170);
                     if (player.getHitbox().intersects(attackingHitbox)) {
                         // Player collided with the attacking hitbox, deal damage to the player
-                        player.damage(1);
+                        player.damage(damage);
                         canAttack = false;
                         cooldownTimer = attackCooldown;
                     } else {
@@ -151,8 +151,7 @@ public class FinalBoss2 extends Enemy{
         if (!canAttack && cooldownTimer > 0) {
             cooldownTimer--;
             if (cooldownTimer == 0) {
-                // Cooldown is finished, reset the attack animation
-              //  enemyState = IDLE_BOSS2;
+
                 canAttack = true;
                 attackDelayTimer = 0; // Reset the attack delay timer
             }

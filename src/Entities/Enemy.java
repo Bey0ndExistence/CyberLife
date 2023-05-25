@@ -9,6 +9,10 @@ import java.util.Iterator;
 
 import static Utils.Constants.EnemyConstants.*;
 
+/**
+ * This is an abstract class for creating enemy objects in a game, with methods for updating their
+ * position and handling collisions.
+ */
 public abstract class Enemy extends TilesHitBox {
 
     protected int aniIndex, enemyState, enemyType;
@@ -45,12 +49,19 @@ public abstract class Enemy extends TilesHitBox {
     public void update(Camera camera,Player player,ArrayList<TilesHitBox> walls) {
         updateAnimationTick();
         updateEnemyPos(player,walls,camera);
-        if(enemyType == TURRET || enemyType == BOSS_1 )
-            super.update(camera);
-       // System.out.println("update robot");
-        //System.out.println(hitbox.x);
+      
     }
 
+    /**
+     * This function updates the position of an enemy character while checking for collisions with
+     * walls and the player.
+     * 
+     * @param player An object of the Player class, representing the player character in the game.
+     * @param walls An ArrayList of TilesHitBox objects representing the walls and obstacles in the
+     * game level.
+     * @param camera The camera parameter is an object of the Camera class, which is used to control
+     * the view of the game world.
+     */
     public void updateEnemyPos(Player player, ArrayList<TilesHitBox> walls,Camera camera) {
         Iterator<TilesHitBox> iter;
         TilesHitBox wall = null;
@@ -110,10 +121,11 @@ public abstract class Enemy extends TilesHitBox {
 
 
         }
+
+
         if (ok) {
             hitbox.x += xspeed;
         }
-
 
 
         yspeed += 0.035;
@@ -136,7 +148,6 @@ public abstract class Enemy extends TilesHitBox {
 
                     if(enemyType != BOSS_1 && enemyType != BOSS_2 && enemyType != BOSS_3) {
                         player.setAlive(false);
-                        System.out.println("sper ca nu intru aici");
                         EnemyCollidedPlayer(player);
                 }
 
@@ -147,8 +158,6 @@ public abstract class Enemy extends TilesHitBox {
 
         y += yspeed;
         hitbox.y = (int) y;
-
-
 
     }
 

@@ -25,7 +25,7 @@ public class Menu extends State implements Statemethods {
     private boolean isDeathScreen=false;
 
     private Gamestate gamestate= Gamestate.PLAYING;
-    public Menu(Game game) throws GameException {
+    public Menu(Game game)  {
         super(game);
         loadButtons();
         loadMenuBg();
@@ -33,23 +33,36 @@ public class Menu extends State implements Statemethods {
     }
 
 
-    private void loadButtons() throws GameException {
+    private void loadButtons()  {
+
         buttons[0]= new MenuButton(1920/2, 50*2 ,0,Gamestate.PLAYING,game);
         buttons[1]= new MenuButton(1920/2, 120*2 ,1,Gamestate.SAVE,game);
         buttons[2]= new MenuButton(1920/2, 190*2 ,2,Gamestate.QUIT,game);
         deathPlayAgain = new MenuButton(1920/2,200*3,0,Gamestate.PLAYING,game);
     }
 
-    private void loadMenuBg() throws GameException {
-        backgroundImg = new BufferedImage[2];
-        BufferedImage temp = LoadSave.getInstance().getAtlas(LoadSave.MENU_BACKGROUNDS);
-        for (int i = 0; i < backgroundImg.length; i++)
-            backgroundImg[i] = temp.getSubimage(i * 1920, 0, 1920,1120);
-
+    private void loadMenuBg()  {
+        try {
+            backgroundImg = new BufferedImage[2];
+            BufferedImage temp = LoadSave.getInstance().getAtlas(LoadSave.MENU_BACKGROUNDS);
+            for (int i = 0; i < backgroundImg.length; i++)
+                backgroundImg[i] = temp.getSubimage(i * 1920, 0, 1920, 1120);
+        }
+        catch (GameException e){
+            System.out.println(e.toString());
+        }
     }
 
-    private void loadDeathScreen() throws GameException{
-        deathScreen = LoadSave.getInstance().getAtlas(LoadSave.DEATH_SCREEN);
+
+
+    private void loadDeathScreen() {
+        try {
+            deathScreen = LoadSave.getInstance().getAtlas(LoadSave.DEATH_SCREEN);
+
+        }
+        catch (GameException e){
+            System.out.println(e.toString());
+        }
     }
 
     @Override
@@ -98,12 +111,12 @@ public class Menu extends State implements Statemethods {
 
 
     @Override
-    public void mouseReleased(MouseEvent e) throws SQLException, IOException, GameException {
+    public void mouseReleased(MouseEvent e)   {
         for(MenuButton mb: buttons){
-                if (isIn(e, mb)) {
-                    if (mb.isMousePressed())
-                        mb.applyGamestate();
-                    break;
+            if (isIn(e, mb)) {
+                if (mb.isMousePressed())
+                    mb.applyGamestate();
+                break;
 
             }
 
@@ -148,7 +161,7 @@ public class Menu extends State implements Statemethods {
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER && !isDeathScreen)
-            Gamestate.state = Gamestate.PLAYING3;
+            Gamestate.state = gamestate;
 
     }
 

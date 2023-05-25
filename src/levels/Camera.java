@@ -13,7 +13,6 @@ public class Camera {
     private int height;
     private Player target;
 
-    private Enemy enemy;
 
     public Camera(int x, int y, int width, int height, Player player) {
         this.x = x;
@@ -30,10 +29,6 @@ public class Camera {
         }
     }
 
-
-    public void setEnemy(Enemy enemy){
-        this.enemy = enemy;
-    }
 
     public int getX() {
         return x;

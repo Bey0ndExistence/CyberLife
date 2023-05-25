@@ -3,12 +3,14 @@ package gamestates;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.SQLException;
 
 import Entities.EnemyManager;
 import Entities.Player;
 import Utils.GameException;
+import Utils.LoadSave;
 import levels.Camera;
 import levels.LevelManager;
 import Game.Game;
@@ -25,16 +27,27 @@ public class Playing extends State implements Statemethods {
 
     private int score;
 
+    BufferedImage heart;
+
 
 
 
     private Menu menu;
-    public Playing(Game game,Player player, Menu menu,ScoreSubject subject) throws IOException, GameException, SQLException {
+    public Playing(Game game,Player player, Menu menu,ScoreSubject subject)  {
         super(game);
-        this.player = player;
-        this.menu = menu;
-        this.subject = subject;
-        initClasses();
+        try {
+
+            this.player = player;
+            this.menu = menu;
+            this.subject = subject;
+            BufferedImage hearts = LoadSave.getInstance().getAtlas(LoadSave.HEARTS);
+            heart = hearts.getSubimage(2, 0, 30, 28);
+            initClasses();
+        }
+        catch (GameException e)
+        {
+            System.out.println(e.toString());
+        }
     }
 
     private void initClasses() {
@@ -48,6 +61,7 @@ public class Playing extends State implements Statemethods {
         catch (GameException e){
             System.out.println(e.toString());
         }
+
     }
 
     @Override
@@ -56,7 +70,7 @@ public class Playing extends State implements Statemethods {
         player.update(levelManager.getHitBoxes(),enemyManager.getEnemies());
         levelManager.update();
         enemyManager.update(levelManager.getHitBoxes());
-       // score = enemyManager.getScore();
+        // score = enemyManager.getScore();
 
     }
 
@@ -67,11 +81,19 @@ public class Playing extends State implements Statemethods {
         levelManager.drawTiles(g);
         player.render(g);
         enemyManager.drawEnemies(g);
-        g.setFont(new Font("Arial", Font.PLAIN,40));
+        g.setFont(new Font("Arial", Font.PLAIN, 40));
         g.setColor(Color.white);
-        g.drawString(  " Score: "+ subject.getScore() +" XP",20,50);
-        g.drawString( "Lives: "+ player.getPlayerLives(),30,100);
+        g.drawString(" Score: " + subject.getScore() + " XP", 20, 50);
+        g.drawString("Lives: ", 30, 100);
 
+        int heartWidth = 30 * 2; // Width of each heart image
+        int heartSpacing = 10; // Adjust the spacing between hearts
+        int startX = 150; // Starting X position for the first heart
+
+        for (int i = 1; i <= player.getPlayerLives(); i++) {
+            int heartX = startX + (i - 1) * (heartWidth + heartSpacing); // Calculate the X position for each heart
+            g.drawImage(heart, heartX, 55, heartWidth, 28 * 2, null);
+        }
     }
 
     public int getScore(){
